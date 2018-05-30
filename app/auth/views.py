@@ -1,4 +1,4 @@
-from flask import redirect, url_for, render_template, session, current_app, request
+from flask import redirect, url_for, render_template, session, current_app, request, flash
 from flask_login import login_user
 from app.auth import auth
 from app.auth.forms import LoginForm
@@ -15,5 +15,9 @@ def login():
 
         if user is not None and user.verify_password(form.password.data):
             login_user(user,  form.remember_me.data)
-            next = request.args.get('')
-        return redirect(request.args.get('next') or url_for('main'))
+            return redirect(request.args.get('next')) or url_for('main.index')
+        flash('invalid username or password.')
+    return render_template('auth/login.html',form=form)
+
+        # next = request.args.get('next')
+        #return redirect(request.args.get('next') or url_for('main'))
