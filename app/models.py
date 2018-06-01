@@ -1,3 +1,5 @@
+from flask import current_app
+from itsdangerous import Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from . import db, login_manager
@@ -35,6 +37,35 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+    # # 确认用户账户
+    # confirmed = db.Column(db.Boolean, default=False)
+    #
+    # # generate_confirmation_token（）方法生成一个令牌
+    # def generate_confirmation_token(self, expiration=3600):
+    #     # 生成具有过期时间的json web签名
+    #     s = Serializer(current_app.config('SECRET_KEY'), expiration)
+    #
+    #     # dump() 为指定的数据生成加密签名，
+    #     # 然后数据和签名 序列化 生成令牌字符串
+    #     return s.dump({'confirm':self.id})
+    # # confirm（）检验令牌
+    # def confirm(self, token):
+    #     s = Serializer(current_app.config['SECRET_KEY'])
+    #     try:
+    #         # load()解码令牌，唯一参数：令牌字符串。
+    #         # 首先检验签名、过期时间，
+    #         # 通过：返回数据；否则抛出异常
+    #         data = s.load(token)
+    #     except Exception as e:
+    #         return False
+    #     # 检验通过
+    #     # 检验令牌中的id和current_USER中的用户匹配，确保恶意用户并不能确认别人账户
+    #     if data.get('confirm') != self.id:
+    #         return False
+    #     self.confirmed = True
+    #     db.session.add(self)
+    #     return True
 
 
 @login_manager.user_loader
