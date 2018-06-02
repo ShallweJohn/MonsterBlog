@@ -4,14 +4,16 @@ from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo, Val
 
 from app.models import User
 
-
+# 登录表单
 class LoginForm(Form):
+
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),
                                             Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Keep me logged in')
     submit = SubmitField('Log In')
 
+# 注册表单
 class RegistrationForm(Form):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),
                                              Email()])
