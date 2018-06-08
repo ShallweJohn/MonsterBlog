@@ -8,7 +8,6 @@ from app.email import send_email
 from app.models import User
 
 
-
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     # 获取注册表单对象
@@ -41,30 +40,62 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             # 调用内建login_user函数，标记为已登陆用户
             login_user(user, form.remember_me.data)
-            #
-            return redirect(request.args.get('next')) or url_for('main.index')
+            next = request.args.get('next')
+            if next is None or not next.startwith('/'):
+                next = url_for('main.index')
+            return redirect(next)
         # 电子邮件或密码不正确，发送flash消息，再次渲染表单，让用户重试登陆
         flash('账户或密码不正确')
     return render_template('auth/login.html', form=form)
 
 @auth.route('/confirm/<token>')
+# 确认账户路由
 # flask提供的login_required装饰器保护这个路由，先执行
 @login_required
 def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.index'))
     if current_user.confirm(token):
+        db.session.commit()
         return flash('你已确认过账户')
     else:
         flash('确认链接已失效过期')
         return redirect(url_for('main.index'))
 
+@auth.before_app_request
+def before_request():
+    """通过请求勾子处理过滤未确认账户"""
+    if current_user.is_authenticated:
+        current_user.refresh_last_seen()
+        if not current_user.confirmed \
+                and not current_user.confirmed \
+                and request.endpoint \
+                and request.blueprint != 'auth' \
+                and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))
 
 
+@auth.route('/unconfirmed')
+def unconfirmed():
+    if current_user.is_anonymous or current_user.confirmed:
+        return redirect(url_for('main.index'))
+    return render_template('auth/unconfirmed.html')
+
+
+@auth.route('/confirm')
+@login_required
+# 重发验证电子邮件
+def resend_confirmation():
+    token = current_user.generate_confirmation_token()
+    send_email(current_user.email, '确认你的账户',
+               'auth/email/confirm', user = current_user, token=token)
+    flash('一封确认邮件已发送至你的邮箱')
+    return redirect(url_for('main.index'))
 
 @auth.route('/logout')
 def logout():
     logout_user()
     flash('你已登出')
     return redirect(url_for('main.index'))
+
 

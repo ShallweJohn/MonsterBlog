@@ -6,7 +6,6 @@ from app.models import User
 
 # 登录表单
 class LoginForm(Form):
-
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),
                                             Email()])
     password = PasswordField('Password', validators=[DataRequired()])
