@@ -21,7 +21,7 @@ MarkupSafe==1.0
 migrate==0.3.8
 moment==0.2.0
 mysqlclient==1.3.12
-Pillow==5.1.0
+Pillow==8.1.1
 PyMySQL==0.8.1
 python-dateutil==2.7.2
 python-editor==1.0.3
